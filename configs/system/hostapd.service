@@ -17,3 +17,5 @@ ExecReload=/bin/kill -HUP $MAINPID
 
 [Install]
 WantedBy=multi-user.target
+# BindsTo stops hostapd when wlan0 goes away (e.g. WCNSS crash recovery); start it again when it's back
+WantedBy=sys-subsystem-net-devices-wlan0.device

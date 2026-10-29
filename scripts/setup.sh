@@ -34,6 +34,7 @@ apt install -qqy --no-install-recommends \
     libconfig11 \
     libconfig-dev \
     libc6-dev \
+    libqmi-utils \
     linux-libc-dev \
     locales \
     minicom \
@@ -133,19 +134,12 @@ systemctl mask systemd-networkd-wait-online.service
 sed -i 's/^#HandlePowerKey=poweroff/HandlePowerKey=ignore/' /etc/systemd/logind.conf
 
 # Enable IPv4 and IPv6 forwarding
-if [ -f /etc/sysctl.conf ]; then
-    # Uncomment existing lines if they exist
-    sed -i -e 's/^#net.ipv4.ip_forward=1/net.ipv4.ip_forward=1/' -e 's/^#net.ipv6.conf.all.forwarding=1/net.ipv6.conf.all.forwarding=1/' /etc/sysctl.conf
-    # Add the lines if they don't exist at all
-    grep -q '^net.ipv4.ip_forward' /etc/sysctl.conf || echo 'net.ipv4.ip_forward=1' >> /etc/sysctl.conf
-    grep -q '^net.ipv6.conf.all.forwarding' /etc/sysctl.conf || echo 'net.ipv6.conf.all.forwarding=1' >> /etc/sysctl.conf
-else
-    # Create the file with the required settings
-    cat <<EOF > /etc/sysctl.conf
+# (systemd-sysctl in Debian 13 no longer reads /etc/sysctl.conf, so use sysctl.d)
+mkdir -p /etc/sysctl.d
+cat <<EOF > /etc/sysctl.d/90-router.conf
 # Enable IPv4 forwarding
 net.ipv4.ip_forward=1
 
 # Enable IPv6 forwarding
 net.ipv6.conf.all.forwarding=1
 EOF
-fi

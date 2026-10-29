@@ -97,6 +97,13 @@ cp -a scripts/msm-firmware-loader.sh ${CHROOT}/usr/sbin
 wget -O - http://mirror.postmarketos.org/postmarketos/master/aarch64/linux-postmarketos-qcom-msm8916-6.12.1-r7.apk \
     | tar xkzf - -C ${CHROOT} --exclude=.PKGINFO --exclude=.SIGN* 2>/dev/null
 
+# The module index that ends up in the image has no dependencies, so any module that
+# needs another one (usb_f_rndis -> u_ether, ip_tables -> x_tables, ...) fails to load:
+# no USB gadget, no firewall/NAT, no zram. Rebuild it.
+for kver in $(ls ${CHROOT}/lib/modules); do
+    depmod -a -b ${CHROOT} ${kver}
+done
+
 mkdir -p ${CHROOT}/boot/extlinux
 cp configs/extlinux.conf ${CHROOT}/boot/extlinux
 
