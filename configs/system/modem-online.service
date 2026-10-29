@@ -1,0 +1,14 @@
+[Unit]
+Description=UF896 modem: power-cycle SIM and set online
+After=rmtfs.service
+Before=ModemManager.service
+ConditionPathExists=/usr/local/sbin/modem-online.sh
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/modem-online.sh
+RemainAfterExit=yes
+TimeoutStartSec=120
+
+[Install]
+WantedBy=multi-user.target

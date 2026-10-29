@@ -21,7 +21,6 @@ apt install -qqy --no-install-recommends \
     bash-completion \
     bc \
     bridge-utils \
-    build-essential \
     curl \
     ca-certificates \
     dnsmasq \
@@ -49,11 +48,9 @@ apt install -qqy --no-install-recommends \
     qrtr-tools \
     rfkill \
     rmtfs \
-    ruby \
     socat \
     sudo \
     systemd-timesyncd \
-    tor \
     tzdata \
     unzip \
     vim \

@@ -1,0 +1,12 @@
+[Unit]
+Description=UF896 modem watchdog (recover from factory-test / LTE loss)
+After=modem-online.service ModemManager.service
+ConditionPathExists=/usr/local/sbin/modem-watchdog.sh
+
+[Service]
+ExecStart=/usr/local/sbin/modem-watchdog.sh
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

@@ -93,6 +93,11 @@ chmod +x ${CHROOT}/usr/sbin/wifi-ap.sh
 
 cp -a scripts/msm-firmware-loader.sh ${CHROOT}/usr/sbin
 
+# UF896 modem: SIM power-cycle at boot + watchdog for the ~7 min LTE drop
+mkdir -p ${CHROOT}/usr/local/sbin
+cp configs/uf896/modem-online.sh configs/uf896/modem-watchdog.sh ${CHROOT}/usr/local/sbin/
+chmod 755 ${CHROOT}/usr/local/sbin/modem-online.sh ${CHROOT}/usr/local/sbin/modem-watchdog.sh
+
 # install kernel
 wget -O - http://mirror.postmarketos.org/postmarketos/master/aarch64/linux-postmarketos-qcom-msm8916-6.12.1-r7.apk \
     | tar xkzf - -C ${CHROOT} --exclude=.PKGINFO --exclude=.SIGN* 2>/dev/null
@@ -109,6 +114,9 @@ cp configs/extlinux.conf ${CHROOT}/boot/extlinux
 
 # copy custom dtb's
 cp dtbs/* ${CHROOT}/boot/dtbs/qcom/
+
+# UF896 device tree with the stock modem/Wi-Fi memory layout (extlinux.conf boots it)
+CHROOT=${CHROOT} sh -e scripts/patch_uf896_dtb.sh
 
 # create missing directory
 mkdir -p ${CHROOT}/lib/firmware/msm-firmware-loader

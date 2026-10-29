@@ -8,6 +8,30 @@ This builder uses the precompiled [kernel](https://pkgs.postmarketos.org/package
 > - `debian`  : Debian (stable) based image (default branch).
 > - `ubuntu-24.04` : Ubuntu 24.04 LTS (Noble) based image (identical build steps).
 > - Alpine (upstream) : Refer to the [original repository's](https://github.com/kinsamanka/OpenStick-Builder/tree/alpine) alpine branch (not maintained here).
+> - `uf896` : Debian image for the **UF896_V1.1** (Wingtech) stick, see [UF896](#uf896) below.
+
+## UF896
+This branch targets the UF896_V1.1 board (MSM8916, 384 MB RAM, 4 GB eMMC; the case carries the LTE antenna). Differences from `debian`:
+
+- Boots `msm8916-thwc-uf896-wcnssfix.dtb`, generated at build time from the kernel's UF896 device tree by [`scripts/patch_uf896_dtb.sh`](scripts/patch_uf896_dtb.sh): stock memory layout (modem 78 MB at `0x86800000`, Wi-Fi fixed at `0x8b600000`), which the working Wi-Fi firmware is linked for.
+- `modem-online.service`: power-cycles the SIM and sets the modem online at boot (otherwise it reports no SIM).
+- `modem-watchdog.service`: the UF896 modem drops LTE about 7 minutes after every start and stays in `factory-test` mode. The watchdog restarts it in software (including reloading `qcom_bam_dmux`). Expect a 1–6 minute outage each time; see `journalctl -t modem-watchdog`. The underlying cause is not known yet.
+- No `tor`, `ruby` or `build-essential`.
+
+### Firmware
+The image has no firmware; the stick has no `modem`/`persist` partitions to load it from. Install it once over SSH after flashing, from your own copies:
+
+```shell
+scripts/install_uf896_firmware.sh <uf896-image-dir> <sp970-fw-dir> <WCNSS_qcom_wlan_nv.bin> [root@192.168.100.1]
+```
+
+- **Modem:** the UF896's own set (`MPSS.DPM.2.0.2.c1-00155`) plus `mcfg_sw.mbn` from `common/row/gen_3gpp`. The UFI001C/UZ801/SP970 modem firmware crashes this board's modem.
+- **Wi-Fi:** WCNSS from the SP970 set (`CNSS.PR.1.4.2.C4.1-00040`) with the UF896 calibration file. The UF896/UFI001C WCNSS (`CNSS.PR.1.4.3-00110`) crashes 422 s after starting and takes LTE down with it.
+
+### Notes
+- Default login `user` / `1`, hotspot `4G-UFI-XX` / `1234567890` at `192.168.100.1`. Change both, and add an SSH key before using it anywhere.
+- Serial console (1.8 V, 115200 8N1): of the 8 round pads on the bottom edge (USB plug on the right, counted from the left), pad 1 is the stick's TX and pad 6 its RX; GND on the USB plug's tabs.
+- No LTE signal at all (-128 dBm, `NoNetworkFound`) with the board out of its case means no antenna.
 
 ## Build Instructions
 ### Build locally
